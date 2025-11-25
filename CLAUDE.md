@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-worklog-mcp is a structured work log MCP (Model Context Protocol) tool for AI assistants. It provides SQLite-backed logging functionality for recording and searching work activities, designed for pharmacist duties and development tasks.
+worklog-mcp is a structured work log MCP (Model Context Protocol) server for AI assistants. It provides SQLite-backed logging functionality for recording and searching work activities, designed for pharmacist duties and development tasks.
 
 ## Build & Install Commands
 
@@ -15,26 +15,50 @@ uv tool install .
 # Or install in development mode
 uv pip install -e .
 
-# Run CLI commands
+# Run MCP server (for Claude Code / Claude Desktop)
+worklog-mcp-server
+
+# Run CLI commands (for manual use)
 worklog-mcp search [keyword] --start YYYY-MM-DD --end YYYY-MM-DD --limit N
 worklog-mcp add "content" --category "Category" --tags "tag1,tag2"
-worklog-mcp schema  # Output JSON schema for AI registration
+worklog-mcp schema
+```
+
+## MCP Server Setup
+
+### Claude Code (~/.claude/settings.json)
+
+```json
+{
+  "mcpServers": {
+    "worklog": {
+      "command": "worklog-mcp-server"
+    }
+  }
+}
+```
+
+### Claude Desktop (claude_desktop_config.json)
+
+```json
+{
+  "mcpServers": {
+    "worklog": {
+      "command": "worklog-mcp-server"
+    }
+  }
+}
 ```
 
 ## Architecture
 
-- **Entry point**: `src/worklog_mcp/main.py` - Contains all logic (Typer CLI, Pydantic models, SQLite operations)
-- **Data storage**: SQLite database at `~/.local/share/worklog-mcp/mcp-tools/logs.db` (via platformdirs)
-- **CLI framework**: Typer with Rich for table output
+- **MCP Server**: `src/worklog_mcp/server.py` - FastMCP-based server with tools
+- **CLI**: `src/worklog_mcp/main.py` - Typer CLI for manual operations
+- **Data storage**: SQLite at `~/.local/share/worklog-mcp/mcp-tools/logs.db`
 
-### Core Functions
+### MCP Tools
 
-- `add_log(content, category, tags)` - Insert work record
-- `search_logs(LogSearchInput)` - Query logs by keyword/date range
-- `init_db()` / `get_db_connection()` - Database lifecycle
-
-### Data Models (Pydantic)
-
-- `LogEntry` - Single log record
-- `LogSearchInput` - Search parameters
-- `AddLogResult` / `LogsSearchResult` - Operation results
+- `add_log(content, category, tags)` - Add work record
+- `search_logs(keyword, start_date, end_date, limit)` - Search logs
+- `get_recent_logs(limit)` - Get recent entries
+- `get_logs_by_category(category, limit)` - Filter by category

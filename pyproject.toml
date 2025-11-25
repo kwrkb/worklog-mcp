@@ -12,7 +12,9 @@ dependencies = [
     "rich",
     "pydantic",
     "platformdirs",
+    "mcp",
 ]
 
 [project.scripts]
 worklog-mcp = "worklog_mcp.main:app"
+worklog-mcp-server = "worklog_mcp.server:main"
