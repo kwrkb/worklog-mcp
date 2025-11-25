@@ -10,13 +10,22 @@ AIアシスタント向けの構造化された作業記録MCPサーバー。作
 
 ## インストール
 
-### uvを使用（推奨）
+### GitHubから直接インストール（推奨）
 
 ```bash
 # uvがない場合は先にインストール
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# worklog-mcpをインストール
+# GitHubから直接インストール
+uv tool install git+https://github.com/kwrkb/worklog-mcp
+```
+
+### ローカルからインストール
+
+```bash
+# リポジトリをクローンしてインストール
+git clone https://github.com/kwrkb/worklog-mcp.git
+cd worklog-mcp
 uv tool install .
 
 # または開発モードでインストール
@@ -26,20 +35,32 @@ uv pip install -e .
 ### pipを使用
 
 ```bash
-pip install .
+pip install git+https://github.com/kwrkb/worklog-mcp
 ```
 
 ## MCPサーバーとして使用
 
 ### Claude Code（claude mcp addコマンド）
 
-最も簡単な方法は `claude mcp add` コマンドを使用することです：
+最も簡単な方法は `claude mcp add` コマンドを使用することです。
+
+#### uvxを使用（インストール不要）
 
 ```bash
 # グローバルに追加（すべてのプロジェクトで使用可能）
-claude mcp add worklog -s user -- worklog-mcp-server
+claude mcp add worklog -s user -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
 
 # プロジェクト固有で追加（現在のプロジェクトのみ）
+claude mcp add worklog -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+```
+
+#### インストール済みの場合
+
+```bash
+# グローバルに追加
+claude mcp add worklog -s user -- worklog-mcp-server
+
+# プロジェクト固有で追加
 claude mcp add worklog -- worklog-mcp-server
 ```
 
@@ -57,7 +78,8 @@ claude mcp list
 {
   "mcpServers": {
     "worklog": {
-      "command": "worklog-mcp-server"
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/kwrkb/worklog-mcp", "worklog-mcp-server"]
     }
   }
 }
@@ -72,7 +94,8 @@ Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 {
   "mcpServers": {
     "worklog": {
-      "command": "worklog-mcp-server"
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/kwrkb/worklog-mcp", "worklog-mcp-server"]
     }
   }
 }
