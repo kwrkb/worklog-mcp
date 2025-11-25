@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "worklog-mcp"
+version = "0.1.0"
+description = "AIのための構造化された作業記録MCPツール"
+requires-python = ">=3.11"
+dependencies = [
+    "typer",
+    "rich",
+    "pydantic",
+    "platformdirs",
+]
+
+[project.scripts]
+worklog-mcp = "worklog_mcp.main:app"
