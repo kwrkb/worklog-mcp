@@ -85,8 +85,8 @@ MCPサーバーを設定後、Claude Code や Claude Desktop から以下のツ�
 ### add_log - 作業記録を追加
 
 ```
-「処方箋確認を完了した」と作業記録に追加して
-→ add_log(content="処方箋確認を完了した", category="薬剤師業務", tags="処方箋,確認")
+「APIエンドポイントの実装を完了した」と作業記録に追加して
+→ add_log(content="APIエンドポイントの実装を完了した", category="開発", tags="API,実装")
 
 今日やったバグ修正を記録して
 → add_log(content="ログイン画面のバリデーションエラーを修正", category="開発", tags="バグ修正,認証")
@@ -94,14 +94,14 @@ MCPサーバーを設定後、Claude Code や Claude Desktop から以下のツ�
 
 **パラメータ:**
 - `content` (必須): 作業内容
-- `category` (任意): カテゴリ名（例: 開発、薬剤師業務、会議）
+- `category` (任意): カテゴリ名（例: 開発、レビュー、会議）
 - `tags` (任意): カンマ区切りのタグ
 
 ### search_logs - ログを検索
 
 ```
-「処方箋」に関するログを検索して
-→ search_logs(keyword="処方箋")
+「API」に関するログを検索して
+→ search_logs(keyword="API")
 
 先週のバグ修正履歴を見せて
 → search_logs(keyword="バグ", start_date="2025-11-18", end_date="2025-11-25")
@@ -142,10 +142,10 @@ MCPサーバー経由ではなく、コマンドラインから直接操作す�
 
 ```bash
 # 基本的な追加
-worklog-mcp add "処方箋システムのバグ修正"
+worklog-mcp add "認証システムのバグ修正"
 
 # カテゴリとタグを指定
-worklog-mcp add "処方箋システムのバグ修正" --category "開発" --tags "バグ修正,処方箋"
+worklog-mcp add "認証システムのバグ修正" --category "開発" --tags "バグ修正,認証"
 
 # 短縮オプション
 worklog-mcp add "会議メモ" -c "会議" -t "定例,チーム"
@@ -164,7 +164,7 @@ worklog-mcp search "バグ" --start 2025-11-01 --end 2025-11-30
 worklog-mcp search "バグ" --limit 20
 
 # 全てのオプションを組み合わせ
-worklog-mcp search "処方箋" --start 2025-11-01 --end 2025-11-30 --limit 10
+worklog-mcp search "API" --start 2025-11-01 --end 2025-11-30 --limit 10
 ```
 
 ### スキーマを確認
