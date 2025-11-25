@@ -157,6 +157,90 @@ MCPサーバーを設定後、Claude Code や Claude Desktop から以下のツ�
 - `category` (必須): カテゴリ名
 - `limit` (任意): 取得件数（デフォルト: 50）
 
+## 自動ログ機能（Claude Code Hooks）
+
+Claude Code の Hooks 機能を使うと、作業完了時に自動でログを記録できます。
+
+### 設定方法
+
+`~/.claude/settings.json` に以下を追加：
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "会話で行った作業を worklog MCP の add_log ツールで記録してください。カテゴリは作業内容に応じて「開発」「調査」「レビュー」「設定」などを選択し、関連するタグも付けてください。"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### 動作
+
+1. Claude Code での作業が完了すると、Stop フックがトリガー
+2. Claude が自動的に `add_log` ツールを呼び出し、作業内容を記録
+3. カテゴリとタグが自動で付与される
+
+### カスタマイズ例
+
+#### 特定ツール使用後にログ
+
+Edit/Write ツール使用後に自動記録する場合：
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "ファイルを編集しました。この変更内容を worklog MCP の add_log で記録してください。"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### コミット後にログ
+
+Git コミット後に自動記録する場合：
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "git commit を実行した場合は、コミット内容を worklog MCP の add_log で記録してください。git commit でなければ何もしないでください。"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### 注意事項
+
+- Hooks は Claude Code v1.0.17 以降で利用可能
+- `type: "prompt"` を使うと、Claude に追加の指示を与えられます
+- `type: "command"` を使うと、シェルコマンドを直接実行できます
+
 ## CLIとして使用
 
 MCPサーバー経由ではなく、コマンドラインから直接操作することもできます。
