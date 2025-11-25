@@ -14,10 +14,7 @@ DB_DIR = Path(user_data_dir(APP_NAME, "mcp-tools"))
 DB_PATH = DB_DIR / "logs.db"
 
 # MCPサーバー初期化
-mcp = FastMCP(
-    "worklog-mcp",
-    description="作業履歴を正確に記録・検索するためのMCPサーバーです。"
-)
+mcp = FastMCP("worklog-mcp")
 
 
 def init_db():
