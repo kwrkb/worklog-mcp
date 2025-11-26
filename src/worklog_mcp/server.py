@@ -147,6 +147,71 @@ def get_logs_by_category(category: str, limit: int = 10) -> dict[str, Any]:
     return search_logs(keyword=category, limit=limit)
 
 
+def get_logs_for_date(date_str: str) -> str:
+    """指定日付のログをテキスト形式で取得（内部ヘルパー関数）"""
+    with get_db_connection() as conn:
+        rows = conn.execute(
+            "SELECT * FROM logs WHERE date(timestamp) = ? ORDER BY timestamp",
+            (date_str,)
+        ).fetchall()
+
+        if not rows:
+            return f"# {date_str} のログ\n\nログが見つかりませんでした。"
+
+        lines = [f"# {date_str} のログ\n"]
+        for row in rows:
+            time = row["timestamp"].split("T")[1] if "T" in row["timestamp"] else ""
+            tags_text = f" [{row['tags']}]" if row["tags"] else ""
+            lines.append(f"## [{row['category']}] {time}{tags_text}")
+            lines.append(f"{row['content']}\n")
+
+        return "\n".join(lines)
+
+
+@mcp.resource("logs://today")
+def logs_today() -> str:
+    """今日のログを取得"""
+    today = datetime.now().date().isoformat()
+    return get_logs_for_date(today)
+
+
+@mcp.resource("logs://{date}")
+def logs_by_date(date: str) -> str:
+    """指定日付のログを取得（YYYY-MM-DD形式）"""
+    return get_logs_for_date(date)
+
+
+@mcp.prompt()
+def daily_report() -> list[dict[str, str]]:
+    """今日の作業ログから日報を作成するためのプロンプト"""
+    today = datetime.now().date().isoformat()
+
+    return [
+        {
+            "role": "user",
+            "content": f"""logs://today のリソースを参照して、以下の構成で業務日報を作成してください。
+
+【本日のハイライト】
+今日の最も重要な成果や進捗を2-3点で簡潔にまとめる
+
+【業務詳細】
+カテゴリごとに作業内容を整理：
+- 開発: ...
+- 調査: ...
+- ミーティング: ...
+（該当するカテゴリのみ記載）
+
+【課題と解決】
+発生した問題とその対応について
+
+【明日の予定】
+次に取り組むべきタスク
+
+日付: {today}"""
+        }
+    ]
+
+
 def main():
     """MCPサーバーを起動"""
     mcp.run()

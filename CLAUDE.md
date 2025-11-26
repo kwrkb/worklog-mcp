@@ -62,3 +62,12 @@ worklog-mcp schema
 - `search_logs(keyword, start_date, end_date, limit)` - Search logs
 - `get_recent_logs(limit)` - Get recent entries
 - `get_logs_by_category(category, limit)` - Filter by category
+
+### MCP Resources
+
+- `logs://today` - Today's logs in Markdown format
+- `logs://{date}` - Specific date logs (YYYY-MM-DD)
+
+### MCP Prompts
+
+- `daily-report` - Generate daily report from today's logs
