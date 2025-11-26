@@ -145,13 +145,15 @@ def search_logs(
 
 @app.command(name="search")
 def cli_search_logs(
-    keyword: Optional[str] = typer.Argument(None, help="検索キーワード。"),
-    start: Optional[str] = typer.Option(None, "--start", "-s", help="検索開始日 (YYYY-MM-DD)。"),
-    end: Optional[str] = typer.Option(None, "--end", "-e", help="検索終了日 (YYYY-MM-DD)。"),
-    limit: int = typer.Option(10, "--limit", "-l", help="表示するログの最大数。"),
+    keyword: Optional[str] = typer.Argument(None, help="検索キーワード (Search keyword). ログの内容、カテゴリ、タグから検索します。"),
+    start: Optional[str] = typer.Option(None, "--start", "-s", help="検索開始日 (Start Date). YYYY-MM-DD形式 (例: 2025-11-01)。"),
+    end: Optional[str] = typer.Option(None, "--end", "-e", help="検索終了日 (End Date). YYYY-MM-DD形式 (例: 2025-11-30)。"),
+    limit: int = typer.Option(10, "--limit", "-l", help="表示件数 (Limit). デフォルトは10件です。"),
 ):
     """
-    作業ログを検索し、テーブル表示します。
+    作業ログを検索し、テーブル表示します (Search work logs).
+    
+    キーワード、期間、またはその両方を使用して過去の作業記録を検索します。
     """
     search_input = LogSearchInput(keyword=keyword, start_date=start, end_date=end, limit=limit)
     result = search_logs(search_input)
@@ -180,12 +182,14 @@ def cli_search_logs(
 
 @app.command(name="add")
 def cli_add_log(
-    content: str = typer.Argument(..., help="記録する作業内容。"),
-    category: str = typer.Option("General", "--category", "-c", help="作業の分類。"),
-    tags: Optional[str] = typer.Option(None, "--tags", "-t", help="カンマ区切りのタグ。"),
+    content: str = typer.Argument(..., help="作業内容 (Content). 記録する作業の詳細。"),
+    category: str = typer.Option("General", "--category", "-c", help="カテゴリ (Category). 作業の分類 (例: 開発, 調査)。"),
+    tags: Optional[str] = typer.Option(None, "--tags", "-t", help="タグ (Tags). カンマ区切りのタグ (例: バグ修正,認証)。"),
 ):
     """
-    作業ログを追加します。
+    作業ログを追加します (Add a work log).
+    
+    作業内容、カテゴリ、タグを指定してログを記録します。
     """
     tags_list = [t.strip() for t in tags.split(",")] if tags else None
     result = add_log(content=content, category=category, tags=tags_list)
@@ -195,7 +199,9 @@ def cli_add_log(
 @app.command(name="schema")
 def print_schema():
     """
-    AIに登録するためのJSONスキーマを標準出力に出力します。
+    MCPサーバー用のJSONスキーマを出力します (Print MCP JSON Schema).
+    
+    AIエージェント設定用のツール定義を出力します。
     """
     # add_log用のスキーマを手動で定義
     add_log_params_schema = {

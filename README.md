@@ -1,6 +1,11 @@
 # worklog-mcp
 
+**[English](#english) | [日本語](#japanese)**
+
+<a name="japanese"></a>
+
 AIアシスタント向けの構造化された作業記録MCPサーバー。作業履歴を記録・検索できます。
+すべてのMCP (Model Context Protocol) 対応IDEやCLIエージェント（Claude Desktop, Claude Code, Cursor, Windsurfなど）で利用可能です。
 
 ## 機能
 
@@ -353,6 +358,366 @@ uv tool dir
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-## ライセンス
+---
+
+<a name="english"></a>
+
+# worklog-mcp (English)
+
+A structured work log MCP server for AI assistants. Record and search your work history.
+Compatible with all MCP (Model Context Protocol) supported IDEs and CLI agents (Claude Desktop, Claude Code, Cursor, Windsurf, etc.).
+
+## Features
+
+- **Add Work Logs**: Record work details with categories and tags.
+- **Search Logs**: Flexible search by keyword, date range, and category.
+- **SQLite Storage**: Persist data locally.
+
+## Installation
+
+### Install directly from GitHub (Recommended)
+
+```bash
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install directly from GitHub
+uv tool install git+https://github.com/kwrkb/worklog-mcp
+```
+
+### Install locally
+
+```bash
+# Clone the repository and install
+git clone https://github.com/kwrkb/worklog-mcp.git
+cd worklog-mcp
+uv tool install .
+
+# Or install in editable mode
+uv pip install -e .
+```
+
+### Using pip
+
+```bash
+pip install git+https://github.com/kwrkb/worklog-mcp
+```
+
+## Usage as an MCP Server
+
+### Claude Code (claude mcp add command)
+
+The easiest way is to use the `claude mcp add` command.
+
+#### Using uvx (No installation required)
+
+```bash
+# Add globally (available in all projects)
+claude mcp add worklog -s user -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+
+# Add per project (current project only)
+claude mcp add worklog -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+```
+
+#### If already installed
+
+```bash
+# Add globally
+claude mcp add worklog -s user -- worklog-mcp-server
+
+# Add per project
+claude mcp add worklog -- worklog-mcp-server
+```
+
+After adding, you can verify with `claude mcp list`:
+
+```bash
+claude mcp list
+```
+
+### Claude Code (Manual Configuration)
+
+Add to `~/.claude/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "worklog": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/kwrkb/worklog-mcp", "worklog-mcp-server"]
+    }
+  }
+}
+```
+
+### Claude Desktop
+
+macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "worklog": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/kwrkb/worklog-mcp", "worklog-mcp-server"]
+    }
+  }
+}
+```
+
+## MCP Tool Usage Examples
+
+After configuring the MCP server, the following tools are available from Claude Code or Claude Desktop.
+
+### add_log - Add a work log
+
+```
+Add "Completed API endpoint implementation" to work log
+→ add_log(content="Completed API endpoint implementation", category="Development", tags="API,Implementation")
+
+Record the bug fix I did today
+→ add_log(content="Fixed validation error on login screen", category="Development", tags="Bugfix,Auth")
+```
+
+**Parameters:**
+- `content` (Required): Details of the work.
+- `category` (Optional): Category name (e.g., Development, Review, Meeting).
+- `tags` (Optional): Comma-separated tags.
+
+### search_logs - Search logs
+
+```
+Search logs for "API"
+→ search_logs(keyword="API")
+
+Show me bug fix history from last week
+→ search_logs(keyword="Bug", start_date="2025-11-18", end_date="2025-11-25")
+```
+
+**Parameters:**
+- `keyword` (Optional): Search keyword.
+- `start_date` (Optional): Start date (YYYY-MM-DD format).
+- `end_date` (Optional): End date (YYYY-MM-DD format).
+- `limit` (Optional): Number of results (default: 50).
+
+### get_recent_logs - Get recent logs
+
+```
+Show me recent work history
+→ get_recent_logs(limit=10)
+```
+
+**Parameters:**
+- `limit` (Optional): Number of results (default: 10).
+
+### get_logs_by_category - Get logs by category
+
+```
+Show me logs in Development category
+→ get_logs_by_category(category="Development", limit=20)
+```
+
+**Parameters:**
+- `category` (Required): Category name.
+- `limit` (Optional): Number of results (default: 50).
+
+## MCP Resources - Reference logs like files
+
+MCP Resources allow you to reference log data as if they were files.
+
+### logs://today - Today's logs
+
+```
+Open resource logs://today
+→ Displays today's work logs in Markdown format
+```
+
+### logs://{date} - Logs for a specific date
+
+```
+Open resource logs://2025-11-25
+→ Displays logs for the specified date in Markdown format
+```
+
+## MCP Prompts - Daily Report Template
+
+Select `daily-report` from Claude's prompt menu to automatically generate a daily business report based on today's logs.
+
+**Prompt Content:**
+- Highlights of the day
+- Details by category
+- Issues and solutions
+- Plan for tomorrow
+
+## Automatic Logging (Claude Code Hooks)
+
+Using Claude Code's Hooks feature, you can automatically record logs when work is completed.
+
+### Configuration
+
+Add the following to `~/.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Please record the work done in this conversation using the worklog MCP add_log tool. Select a category such as 'Development', 'Research', 'Review', 'Config' based on the work content, and add relevant tags."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Behavior
+
+1. When work in Claude Code is completed, the Stop hook is triggered.
+2. Claude automatically calls the `add_log` tool to record the work content.
+3. Category and tags are automatically assigned.
+
+### Customization Examples
+
+#### Log after using specific tools
+
+To automatically record after using Edit/Write tools:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "I edited a file. Please record this change using worklog MCP add_log."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### Log after commit
+
+To automatically record after a Git commit:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "If git commit was executed, record the commit message using worklog MCP add_log. If not git commit, do nothing."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Notes
+
+- Hooks are available in Claude Code v1.0.17 or later.
+- Use `type: "prompt"` to give additional instructions to Claude.
+- Use `type: "command"` to execute shell commands directly.
+
+## Usage as CLI
+
+You can also operate directly from the command line without using the MCP server.
+
+### Add a log
+
+```bash
+# Basic add
+worklog-mcp add "Fixed bug in auth system"
+
+# Specify category and tags
+worklog-mcp add "Fixed bug in auth system" --category "Development" --tags "Bugfix,Auth"
+
+# Short options
+worklog-mcp add "Meeting notes" -c "Meeting" -t "Weekly,Team"
+```
+
+### Search logs
+
+```bash
+# Keyword search
+worklog-mcp search "bug"
+
+# Specify date range
+worklog-mcp search "bug" --start 2025-11-01 --end 2025-11-30
+
+# Limit results
+worklog-mcp search "bug" --limit 20
+
+# Combine all options
+worklog-mcp search "API" --start 2025-11-01 --end 2025-11-30 --limit 10
+```
+
+### Check Schema
+
+```bash
+worklog-mcp schema
+```
+
+## Data Storage Location
+
+Log data is stored in a SQLite database:
+
+```
+~/.local/share/worklog-mcp/logs.db
+```
+
+### Database Schema
+
+```sql
+CREATE TABLE logs (
+    id INTEGER PRIMARY KEY,
+    timestamp TEXT NOT NULL,
+    category TEXT NOT NULL,
+    content TEXT NOT NULL,
+    tags TEXT
+);
+```
+
+## Troubleshooting
+
+### MCP Server not recognized
+
+1. Check if `worklog-mcp-server` command is in your PATH:
+   ```bash
+   which worklog-mcp-server
+   ```
+
+2. Restart Claude Code/Desktop.
+
+3. Check JSON syntax in settings file.
+
+### Commands installed by uv not found
+
+Check uv tool path and add to PATH if necessary:
+
+```bash
+# Check path
+uv tool dir
+
+# Add to .bashrc or .zshrc
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+## License
 
 MIT License
