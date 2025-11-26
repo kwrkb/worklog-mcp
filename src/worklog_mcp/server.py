@@ -144,7 +144,26 @@ def get_logs_by_category(category: str, limit: int = 10) -> dict[str, Any]:
         category: カテゴリ名（例: '開発', '調査', 'ミーティング'）
         limit: 取得するログの最大数
     """
-    return search_logs(keyword=category, limit=limit)
+    with get_db_connection() as conn:
+        rows = conn.execute(
+            "SELECT * FROM logs WHERE category = ? ORDER BY timestamp DESC LIMIT ?",
+            (category, limit)
+        ).fetchall()
+
+        logs = []
+        for row in rows:
+            logs.append({
+                "id": row["id"],
+                "timestamp": row["timestamp"],
+                "category": row["category"],
+                "content": row["content"],
+                "tags": row["tags"].split(",") if row["tags"] else [],
+            })
+
+        return {
+            "message": f"カテゴリ「{category}」の{len(logs)}件のログが見つかりました。",
+            "logs": logs,
+        }
 
 
 def get_logs_for_date(date_str: str) -> str:
