@@ -113,10 +113,16 @@ Gemini CLI は `gemini mcp add` コマンドまたは設定ファイルの編集
 
 ```bash
 # グローバルに追加（すべてのプロジェクトで使用可能）
-gemini mcp add worklog -s user -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+gemini mcp add -s user worklog uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
 
 # プロジェクト固有で追加
-gemini mcp add worklog -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+gemini mcp add worklog uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+```
+
+**Windows の場合:**
+
+```powershell
+gemini mcp add -s user worklog uvx "--from" "git+https://github.com/kwrkb/worklog-mcp" "worklog-mcp-server"
 ```
 
 **Windows の場合:**
@@ -507,10 +513,16 @@ Gemini CLI supports adding MCP servers via the `gemini mcp add` command or by ed
 
 ```bash
 # Add globally (available in all projects)
-gemini mcp add worklog -s user -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+gemini mcp add -s user worklog uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
 
 # Add per project
-gemini mcp add worklog -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+gemini mcp add worklog uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+```
+
+**On Windows:**
+
+```powershell
+gemini mcp add -s user worklog uvx "--from" "git+https://github.com/kwrkb/worklog-mcp" "worklog-mcp-server"
 ```
 
 **On Windows:**
