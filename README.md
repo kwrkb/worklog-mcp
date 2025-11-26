@@ -119,6 +119,12 @@ gemini mcp add worklog -s user -- uvx --from git+https://github.com/kwrkb/worklo
 gemini mcp add worklog -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
 ```
 
+**Windows の場合:**
+
+```powershell
+gemini mcp add worklog -s user uvx "--from" "git+https://github.com/kwrkb/worklog-mcp" "worklog-mcp-server"
+```
+
 #### 手動設定
 
 `~/.gemini/settings.json`（グローバル）または `.gemini/settings.json`（プロジェクト）に追加:
@@ -505,6 +511,12 @@ gemini mcp add worklog -s user -- uvx --from git+https://github.com/kwrkb/worklo
 
 # Add per project
 gemini mcp add worklog -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+```
+
+**On Windows:**
+
+```powershell
+gemini mcp add worklog -s user uvx "--from" "git+https://github.com/kwrkb/worklog-mcp" "worklog-mcp-server"
 ```
 
 #### Manual configuration
