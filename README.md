@@ -5,7 +5,7 @@
 <a name="japanese"></a>
 
 AIアシスタント向けの構造化された作業記録MCPサーバー。作業履歴を記録・検索できます。
-すべてのMCP (Model Context Protocol) 対応IDEやCLIエージェント（Claude Desktop, Claude Code, Cursor, Windsurfなど）で利用可能です。
+すべてのMCP (Model Context Protocol) 対応IDEやCLIエージェント（Claude Desktop, Claude Code, Gemini CLI, Codex CLI, Cursor, Windsurfなど）で利用可能です。
 
 ## 機能
 
@@ -106,9 +106,50 @@ Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 }
 ```
 
+### Gemini CLI
+
+Gemini CLI は `gemini mcp add` コマンドまたは設定ファイルの編集でMCPサーバーを追加できます。
+
+#### コマンドで追加
+
+```bash
+# グローバルに追加（すべてのプロジェクトで使用可能）
+gemini mcp add worklog -s user -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+
+# プロジェクト固有で追加
+gemini mcp add worklog -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+```
+
+#### 手動設定
+
+`~/.gemini/settings.json`（グローバル）または `.gemini/settings.json`（プロジェクト）に追加:
+
+```json
+{
+  "mcpServers": {
+    "worklog": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/kwrkb/worklog-mcp", "worklog-mcp-server"]
+    }
+  }
+}
+```
+
+### Codex CLI
+
+Codex CLI は `~/.codex/config.toml` でMCPサーバーを設定します。
+
+```toml
+[mcp_servers.worklog]
+command = "uvx"
+args = ["--from", "git+https://github.com/kwrkb/worklog-mcp", "worklog-mcp-server"]
+```
+
+**注意:** セクション名は `mcp_servers`（アンダースコア）である必要があります。`mcp-servers` ではありません。
+
 ## MCPツールの使用例
 
-MCPサーバーを設定後、Claude Code や Claude Desktop から以下のツールが利用できます。
+MCPサーバーを設定後、Claude Code、Claude Desktop、Gemini CLI、Codex CLI などから以下のツールが利用できます。
 
 ### add_log - 作業記録を追加
 
@@ -365,7 +406,7 @@ export PATH="$HOME/.local/bin:$PATH"
 # worklog-mcp (English)
 
 A structured work log MCP server for AI assistants. Record and search your work history.
-Compatible with all MCP (Model Context Protocol) supported IDEs and CLI agents (Claude Desktop, Claude Code, Cursor, Windsurf, etc.).
+Compatible with all MCP (Model Context Protocol) supported IDEs and CLI agents (Claude Desktop, Claude Code, Gemini CLI, Codex CLI, Cursor, Windsurf, etc.).
 
 ## Features
 
@@ -466,9 +507,50 @@ Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 }
 ```
 
+### Gemini CLI
+
+Gemini CLI supports adding MCP servers via the `gemini mcp add` command or by editing the settings file.
+
+#### Using commands
+
+```bash
+# Add globally (available in all projects)
+gemini mcp add worklog -s user -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+
+# Add per project
+gemini mcp add worklog -- uvx --from git+https://github.com/kwrkb/worklog-mcp worklog-mcp-server
+```
+
+#### Manual configuration
+
+Add to `~/.gemini/settings.json` (global) or `.gemini/settings.json` (project):
+
+```json
+{
+  "mcpServers": {
+    "worklog": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/kwrkb/worklog-mcp", "worklog-mcp-server"]
+    }
+  }
+}
+```
+
+### Codex CLI
+
+Codex CLI configures MCP servers in `~/.codex/config.toml`.
+
+```toml
+[mcp_servers.worklog]
+command = "uvx"
+args = ["--from", "git+https://github.com/kwrkb/worklog-mcp", "worklog-mcp-server"]
+```
+
+**Note:** The section name must be `mcp_servers` (with underscore), not `mcp-servers`.
+
 ## MCP Tool Usage Examples
 
-After configuring the MCP server, the following tools are available from Claude Code or Claude Desktop.
+After configuring the MCP server, the following tools are available from Claude Code, Claude Desktop, Gemini CLI, Codex CLI, etc.
 
 ### add_log - Add a work log
 
