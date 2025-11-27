@@ -8,21 +8,26 @@ import typer
 from rich.console import Console
 from rich.table import Table
 from pydantic import BaseModel, Field
-from platformdirs import user_data_dir
+
+from .config import get_config, APP_NAME
 
 # --- 設定 ---
-APP_NAME = "worklog-mcp"
-# データベースの保存場所は、OSごとの標準データディレクトリを使用（環境を汚さない）
-DB_DIR = Path(user_data_dir(APP_NAME, "mcp-tools"))
-DB_PATH = DB_DIR / "logs.db"
 console = Console()
 app = typer.Typer()
+
+# データベースパスは設定から取得
+def get_db_path() -> Path:
+    """設定ファイルからDBパスを取得"""
+    return get_config().get_db_path()
+
+DB_PATH = get_db_path()
 
 
 # ディレクトリとデータベースの初期化
 def init_db():
-    DB_DIR.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(DB_PATH) as conn:
+    db_path = get_db_path()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(db_path) as conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS logs (
                 id INTEGER PRIMARY KEY,
@@ -37,7 +42,8 @@ def init_db():
 
 def get_db_connection():
     init_db()
-    conn = sqlite3.connect(DB_PATH)
+    db_path = get_db_path()
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -200,7 +206,7 @@ def cli_add_log(
 def print_schema():
     """
     MCPサーバー用のJSONスキーマを出力します (Print MCP JSON Schema).
-    
+
     AIエージェント設定用のツール定義を出力します。
     """
     # add_log用のスキーマを手動で定義
@@ -244,6 +250,77 @@ def print_schema():
         ]
     }
     console.print_json(json.dumps(schema_output, indent=2, ensure_ascii=False))
+
+
+# --- Config コマンド ---
+
+config_app = typer.Typer(help="設定管理コマンド (Configuration commands)")
+app.add_typer(config_app, name="config")
+
+
+@config_app.command(name="show")
+def config_show():
+    """
+    現在の設定を表示します (Show current configuration).
+
+    データベースパスや設定ファイルの場所を確認できます。
+    """
+    config = get_config()
+    settings = config.get_all()
+
+    console.print("\n[bold cyan]worklog-mcp Configuration[/bold cyan]\n")
+    console.print(f"[yellow]Config File:[/yellow]     {settings['config_file']}")
+    console.print(f"[yellow]DB Path (current):[/yellow] {settings['db_path']}")
+
+    if settings['db_path_custom']:
+        console.print(f"[green]  └─ Custom path set[/green]")
+    else:
+        console.print(f"[dim]  └─ Using default path[/dim]")
+
+    console.print(f"\n[dim]Default DB Path: {settings['db_path_default']}[/dim]\n")
+
+
+@config_app.command(name="set-db-path")
+def config_set_db_path(
+    path: str = typer.Argument(..., help="データベースファイルのパス (Database file path)"),
+):
+    """
+    データベースの保存先を変更します (Set custom database path).
+
+    WSLとWindows間でデータベースを共有する場合などに使用します。
+    例: worklog-mcp config set-db-path /mnt/c/Users/username/worklog.db
+    """
+    try:
+        config = get_config()
+        config.set_db_path(path)
+        abs_path = Path(path).expanduser().resolve()
+        console.print(f"[bold green]✓[/bold green] データベースパスを設定しました: {abs_path}")
+
+        # データベースの親ディレクトリを作成
+        abs_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # データベースを初期化（既存のファイルがある場合はスキップ）
+        if not abs_path.exists():
+            console.print(f"[dim]  └─ 新しいデータベースを作成します...[/dim]")
+        else:
+            console.print(f"[dim]  └─ 既存のデータベースを使用します[/dim]")
+
+    except Exception as e:
+        console.print(f"[bold red]✗[/bold red] エラー: {e}")
+        raise typer.Exit(1)
+
+
+@config_app.command(name="reset")
+def config_reset():
+    """
+    データベースパスをデフォルトに戻します (Reset to default database path).
+
+    カスタム設定を削除し、OS標準の保存場所を使用します。
+    """
+    config = get_config()
+    config.reset_db_path()
+    default_path = config.get_db_path()
+    console.print(f"[bold green]✓[/bold green] データベースパスをデフォルトに戻しました: {default_path}")
 
 
 if __name__ == "__main__":

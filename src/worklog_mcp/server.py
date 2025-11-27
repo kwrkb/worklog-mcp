@@ -6,21 +6,25 @@ from pathlib import Path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
-from platformdirs import user_data_dir
 
-# --- 設定 ---
-APP_NAME = "worklog-mcp"
-DB_DIR = Path(user_data_dir(APP_NAME, "mcp-tools"))
-DB_PATH = DB_DIR / "logs.db"
+from .config import get_config, APP_NAME
 
 # MCPサーバー初期化
 mcp = FastMCP("worklog-mcp")
 
+# データベースパスは設定から取得
+def get_db_path() -> Path:
+    """設定ファイルからDBパスを取得"""
+    return get_config().get_db_path()
+
+DB_PATH = get_db_path()
+
 
 def init_db():
     """データベースとテーブルを初期化"""
-    DB_DIR.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(DB_PATH) as conn:
+    db_path = get_db_path()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(db_path) as conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS logs (
                 id INTEGER PRIMARY KEY,
@@ -36,7 +40,8 @@ def init_db():
 def get_db_connection():
     """DB接続を取得（必要に応じて初期化）"""
     init_db()
-    conn = sqlite3.connect(DB_PATH)
+    db_path = get_db_path()
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 

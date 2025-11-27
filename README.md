@@ -356,6 +356,49 @@ worklog-mcp schema
 ~/.local/share/worklog-mcp/logs.db
 ```
 
+### データベース保存先の設定
+
+WSLとWindows間でデータベースを共有したい場合など、保存先をカスタマイズできます。
+
+#### 現在の設定を確認
+
+```bash
+worklog-mcp config show
+```
+
+出力例：
+```
+worklog-mcp Configuration
+
+Config File:     /home/user/.config/worklog-mcp/config.json
+DB Path (current): /home/user/.local/share/worklog-mcp/logs.db
+  └─ Using default path
+
+Default DB Path: /home/user/.local/share/worklog-mcp/logs.db
+```
+
+#### データベースパスを変更
+
+```bash
+# WSLからWindowsのデータベースを使用する場合
+worklog-mcp config set-db-path /mnt/c/Users/username/worklog.db
+
+# Windowsから別の場所を指定する場合
+worklog-mcp config set-db-path C:\Users\username\Documents\worklog.db
+```
+
+#### デフォルトに戻す
+
+```bash
+worklog-mcp config reset
+```
+
+**注意事項:**
+- 設定ファイルはユーザーのホームディレクトリに保存されます（`~/.config/worklog-mcp/config.json`）
+- `uvx` で実行する場合でも設定は永続化されます
+- パスは絶対パスで指定してください
+- 既存のデータベースを指定すると、そのデータを使用します
+
 ### データベーススキーマ
 
 ```sql
@@ -392,6 +435,69 @@ uv tool dir
 # .bashrc や .zshrc に追加
 export PATH="$HOME/.local/bin:$PATH"
 ```
+
+## アンインストールとクリーンアップ
+
+### アンインストール
+
+```bash
+# uv tool でインストールした場合
+uv tool uninstall worklog-mcp
+
+# pip でインストールした場合
+pip uninstall worklog-mcp
+```
+
+### データと設定のクリーンアップ
+
+アンインストール後、以下のファイルが残ります。必要に応じて削除してください。
+
+#### データベースファイル
+
+```bash
+# Linux/macOS
+rm -rf ~/.local/share/worklog-mcp/
+
+# Windows
+rmdir /s "%LOCALAPPDATA%\mcp-tools\worklog-mcp"
+```
+
+#### 設定ファイル
+
+```bash
+# Linux/macOS
+rm -rf ~/.config/worklog-mcp/
+
+# Windows
+rmdir /s "%LOCALAPPDATA%\worklog-mcp"
+```
+
+#### MCP設定から削除
+
+Claude Code や Claude Desktop、Gemini CLI の設定ファイルから `worklog` サーバーの設定を削除してください。
+
+**Claude Code:**
+```bash
+# グローバル設定から削除
+claude mcp remove worklog -s user
+
+# プロジェクト設定から削除
+claude mcp remove worklog
+```
+
+**Gemini CLI:**
+```bash
+# グローバル設定から削除
+gemini mcp remove worklog -s user
+
+# プロジェクト設定から削除
+gemini mcp remove worklog
+```
+
+**手動削除の場合:**
+- Claude Code: `~/.claude/settings.json`
+- Claude Desktop: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) または `%APPDATA%\Claude\claude_desktop_config.json` (Windows)
+- Gemini CLI: `~/.gemini/settings.json` または `.gemini/settings.json`
 
 ---
 
@@ -751,6 +857,49 @@ Log data is stored in a SQLite database:
 ~/.local/share/worklog-mcp/logs.db
 ```
 
+### Configure Database Location
+
+You can customize the database location, for example, to share the database between WSL and Windows.
+
+#### Check current configuration
+
+```bash
+worklog-mcp config show
+```
+
+Example output:
+```
+worklog-mcp Configuration
+
+Config File:     /home/user/.config/worklog-mcp/config.json
+DB Path (current): /home/user/.local/share/worklog-mcp/logs.db
+  └─ Using default path
+
+Default DB Path: /home/user/.local/share/worklog-mcp/logs.db
+```
+
+#### Change database path
+
+```bash
+# To use Windows database from WSL
+worklog-mcp config set-db-path /mnt/c/Users/username/worklog.db
+
+# To specify a different location on Windows
+worklog-mcp config set-db-path C:\Users\username\Documents\worklog.db
+```
+
+#### Reset to default
+
+```bash
+worklog-mcp config reset
+```
+
+**Notes:**
+- Configuration file is saved in the user's home directory (`~/.config/worklog-mcp/config.json`)
+- Settings persist even when running with `uvx`
+- Specify absolute paths
+- If you specify an existing database, it will use that data
+
 ### Database Schema
 
 ```sql
@@ -787,6 +936,69 @@ uv tool dir
 # Add to .bashrc or .zshrc
 export PATH="$HOME/.local/bin:$PATH"
 ```
+
+## Uninstall and Cleanup
+
+### Uninstall
+
+```bash
+# If installed with uv tool
+uv tool uninstall worklog-mcp
+
+# If installed with pip
+pip uninstall worklog-mcp
+```
+
+### Data and Configuration Cleanup
+
+After uninstalling, the following files will remain. Delete them if needed.
+
+#### Database Files
+
+```bash
+# Linux/macOS
+rm -rf ~/.local/share/worklog-mcp/
+
+# Windows
+rmdir /s "%LOCALAPPDATA%\mcp-tools\worklog-mcp"
+```
+
+#### Configuration Files
+
+```bash
+# Linux/macOS
+rm -rf ~/.config/worklog-mcp/
+
+# Windows
+rmdir /s "%LOCALAPPDATA%\worklog-mcp"
+```
+
+#### Remove from MCP Configuration
+
+Remove the `worklog` server configuration from Claude Code, Claude Desktop, or Gemini CLI settings.
+
+**Claude Code:**
+```bash
+# Remove from global settings
+claude mcp remove worklog -s user
+
+# Remove from project settings
+claude mcp remove worklog
+```
+
+**Gemini CLI:**
+```bash
+# Remove from global settings
+gemini mcp remove worklog -s user
+
+# Remove from project settings
+gemini mcp remove worklog
+```
+
+**Manual removal:**
+- Claude Code: `~/.claude/settings.json`
+- Claude Desktop: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows)
+- Gemini CLI: `~/.gemini/settings.json` or `.gemini/settings.json`
 
 ## License
 

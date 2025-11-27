@@ -22,6 +22,11 @@ worklog-mcp-server
 worklog-mcp search [keyword] --start YYYY-MM-DD --end YYYY-MM-DD --limit N
 worklog-mcp add "content" --category "Category" --tags "tag1,tag2"
 worklog-mcp schema
+
+# Configure database location
+worklog-mcp config show                    # Show current config
+worklog-mcp config set-db-path <path>      # Set custom DB path
+worklog-mcp config reset                   # Reset to default
 ```
 
 ## MCP Server Setup
