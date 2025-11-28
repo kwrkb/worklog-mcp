@@ -31,7 +31,13 @@ def init_db():
                 timestamp TEXT NOT NULL,
                 category TEXT NOT NULL,
                 content TEXT NOT NULL,
-                tags TEXT
+                tags TEXT,
+                file_path TEXT,
+                line_start INTEGER,
+                line_end INTEGER,
+                git_branch TEXT,
+                git_commit TEXT,
+                project_path TEXT
             )
         """)
         conn.commit()
@@ -51,6 +57,12 @@ def add_log(
     content: str,
     category: str = "General",
     tags: list[str] | None = None,
+    file_path: str | None = None,
+    line_start: int | None = None,
+    line_end: int | None = None,
+    git_branch: str | None = None,
+    git_commit: str | None = None,
+    project_path: str | None = None,
 ) -> dict[str, Any]:
     """
     作業記録をデータベースに追加します。
@@ -59,14 +71,23 @@ def add_log(
         content: 記録する作業内容の詳細
         category: 作業の分類（例: '開発', '調査', 'ミーティング'）
         tags: 作業に関連するタグのリスト
+        file_path: 作業中のファイルパス（任意）
+        line_start: 作業した行の開始位置（任意）
+        line_end: 作業した行の終了位置（任意）
+        git_branch: 現在のGitブランチ（任意）
+        git_commit: 現在のGitコミットハッシュ（任意）
+        project_path: プロジェクトのルートパス（任意）
     """
     timestamp = datetime.now().isoformat(timespec='seconds')
     tags_str = ",".join(tags) if tags else ""
 
     with get_db_connection() as conn:
         cursor = conn.execute(
-            "INSERT INTO logs (timestamp, category, content, tags) VALUES (?, ?, ?, ?)",
-            (timestamp, category, content, tags_str)
+            """INSERT INTO logs (timestamp, category, content, tags, file_path,
+               line_start, line_end, git_branch, git_commit, project_path)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (timestamp, category, content, tags_str, file_path,
+             line_start, line_end, git_branch, git_commit, project_path)
         )
         conn.commit()
         return {
@@ -81,6 +102,9 @@ def search_logs(
     keyword: str | None = None,
     start_date: str | None = None,
     end_date: str | None = None,
+    file_path: str | None = None,
+    project_path: str | None = None,
+    git_branch: str | None = None,
     limit: int = 10,
 ) -> dict[str, Any]:
     """
@@ -90,6 +114,9 @@ def search_logs(
         keyword: 検索キーワード（内容、カテゴリ、タグを検索）
         start_date: 検索開始日（YYYY-MM-DD形式）
         end_date: 検索終了日（YYYY-MM-DD形式）
+        file_path: ファイルパスで絞り込み（部分一致）
+        project_path: プロジェクトパスで絞り込み（部分一致）
+        git_branch: Gitブランチで絞り込み（完全一致）
         limit: 取得するログの最大数
     """
     params: list = []
@@ -106,6 +133,18 @@ def search_logs(
         where_clauses.append("timestamp <= ?")
         params.append(f"{end_date}T23:59:59")
 
+    if file_path:
+        where_clauses.append("file_path LIKE ?")
+        params.append(f"%{file_path}%")
+
+    if project_path:
+        where_clauses.append("project_path LIKE ?")
+        params.append(f"%{project_path}%")
+
+    if git_branch:
+        where_clauses.append("git_branch = ?")
+        params.append(git_branch)
+
     where_sql = " AND ".join(where_clauses)
     query = f"SELECT * FROM logs {'WHERE ' + where_sql if where_sql else ''} ORDER BY timestamp DESC LIMIT ?"
     params.append(limit)
@@ -115,13 +154,28 @@ def search_logs(
 
         logs = []
         for row in rows:
-            logs.append({
+            log_data = {
                 "id": row["id"],
                 "timestamp": row["timestamp"],
                 "category": row["category"],
                 "content": row["content"],
                 "tags": row["tags"].split(",") if row["tags"] else [],
-            })
+            }
+            # コンテキスト情報が存在する場合のみ追加
+            if row["file_path"]:
+                log_data["file_path"] = row["file_path"]
+            if row["line_start"]:
+                log_data["line_start"] = row["line_start"]
+            if row["line_end"]:
+                log_data["line_end"] = row["line_end"]
+            if row["git_branch"]:
+                log_data["git_branch"] = row["git_branch"]
+            if row["git_commit"]:
+                log_data["git_commit"] = row["git_commit"]
+            if row["project_path"]:
+                log_data["project_path"] = row["project_path"]
+
+            logs.append(log_data)
 
         return {
             "message": f"検索条件に一致する{len(logs)}件のログが見つかりました。",
@@ -157,13 +211,28 @@ def get_logs_by_category(category: str, limit: int = 10) -> dict[str, Any]:
 
         logs = []
         for row in rows:
-            logs.append({
+            log_data = {
                 "id": row["id"],
                 "timestamp": row["timestamp"],
                 "category": row["category"],
                 "content": row["content"],
                 "tags": row["tags"].split(",") if row["tags"] else [],
-            })
+            }
+            # コンテキスト情報が存在する場合のみ追加
+            if row["file_path"]:
+                log_data["file_path"] = row["file_path"]
+            if row["line_start"]:
+                log_data["line_start"] = row["line_start"]
+            if row["line_end"]:
+                log_data["line_end"] = row["line_end"]
+            if row["git_branch"]:
+                log_data["git_branch"] = row["git_branch"]
+            if row["git_commit"]:
+                log_data["git_commit"] = row["git_commit"]
+            if row["project_path"]:
+                log_data["project_path"] = row["project_path"]
+
+            logs.append(log_data)
 
         return {
             "message": f"カテゴリ「{category}」の{len(logs)}件のログが見つかりました。",
@@ -177,6 +246,12 @@ def update_log(
     content: str | None = None,
     category: str | None = None,
     tags: list[str] | None = None,
+    file_path: str | None = None,
+    line_start: int | None = None,
+    line_end: int | None = None,
+    git_branch: str | None = None,
+    git_commit: str | None = None,
+    project_path: str | None = None,
 ) -> dict[str, Any]:
     """
     既存の作業記録を更新します。
@@ -186,6 +261,12 @@ def update_log(
         content: 新しい作業内容（省略時は変更なし）
         category: 新しいカテゴリ（省略時は変更なし）
         tags: 新しいタグのリスト（省略時は変更なし）
+        file_path: 新しいファイルパス（省略時は変更なし）
+        line_start: 新しい開始行（省略時は変更なし）
+        line_end: 新しい終了行（省略時は変更なし）
+        git_branch: 新しいGitブランチ（省略時は変更なし）
+        git_commit: 新しいGitコミット（省略時は変更なし）
+        project_path: 新しいプロジェクトパス（省略時は変更なし）
     """
     with get_db_connection() as conn:
         # 既存のログを取得
@@ -202,18 +283,29 @@ def update_log(
         new_content = content if content is not None else old_content
         new_category = category if category is not None else old_category
         new_tags = ",".join(tags) if tags is not None else old_tags
+        new_file_path = file_path if file_path is not None else row["file_path"]
+        new_line_start = line_start if line_start is not None else row["line_start"]
+        new_line_end = line_end if line_end is not None else row["line_end"]
+        new_git_branch = git_branch if git_branch is not None else row["git_branch"]
+        new_git_commit = git_commit if git_commit is not None else row["git_commit"]
+        new_project_path = project_path if project_path is not None else row["project_path"]
 
         conn.execute(
-            "UPDATE logs SET content = ?, category = ?, tags = ? WHERE id = ?",
-            (new_content, new_category, new_tags, log_id)
+            """UPDATE logs SET content = ?, category = ?, tags = ?, file_path = ?,
+               line_start = ?, line_end = ?, git_branch = ?, git_commit = ?, project_path = ?
+               WHERE id = ?""",
+            (new_content, new_category, new_tags, new_file_path,
+             new_line_start, new_line_end, new_git_branch, new_git_commit, new_project_path, log_id)
         )
 
         # 編集履歴をログとして追加
         timestamp = datetime.now().isoformat(timespec='seconds')
         history_content = f"[編集履歴] ID {log_id} を更新\n変更前: {old_content[:50]}{'...' if len(old_content) > 50 else ''}\n変更後: {new_content[:50]}{'...' if len(new_content) > 50 else ''}"
         conn.execute(
-            "INSERT INTO logs (timestamp, category, content, tags) VALUES (?, ?, ?, ?)",
-            (timestamp, "システム", history_content, "編集履歴,auto")
+            """INSERT INTO logs (timestamp, category, content, tags, file_path,
+               line_start, line_end, git_branch, git_commit, project_path)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (timestamp, "システム", history_content, "編集履歴,auto", None, None, None, None, None, None)
         )
 
         conn.commit()
@@ -277,7 +369,24 @@ def get_logs_for_date(date_str: str) -> str:
         for row in rows:
             time = row["timestamp"].split("T")[1] if "T" in row["timestamp"] else ""
             tags_text = f" [{row['tags']}]" if row["tags"] else ""
-            lines.append(f"## [{row['category']}] {time}{tags_text}")
+
+            # ファイルコンテキスト情報を追加
+            context_parts = []
+            if row["file_path"]:
+                file_info = row["file_path"]
+                if row["line_start"] and row["line_end"]:
+                    file_info += f":{row['line_start']}-{row['line_end']}"
+                elif row["line_start"]:
+                    file_info += f":{row['line_start']}"
+                context_parts.append(f"📄 {file_info}")
+            if row["git_branch"]:
+                context_parts.append(f"🌿 {row['git_branch']}")
+
+            context_text = " | ".join(context_parts)
+            if context_text:
+                context_text = f"\n> {context_text}"
+
+            lines.append(f"## [{row['category']}] {time}{tags_text}{context_text}")
             lines.append(f"{row['content']}\n")
 
         return "\n".join(lines)
@@ -303,7 +412,24 @@ def get_logs_for_period(start_date: str, end_date: str) -> str:
                 lines.append(f"\n## {current_date}\n")
             time = row["timestamp"].split("T")[1] if "T" in row["timestamp"] else ""
             tags_text = f" [{row['tags']}]" if row["tags"] else ""
-            lines.append(f"### [{row['category']}] {time}{tags_text}")
+
+            # ファイルコンテキスト情報を追加
+            context_parts = []
+            if row["file_path"]:
+                file_info = row["file_path"]
+                if row["line_start"] and row["line_end"]:
+                    file_info += f":{row['line_start']}-{row['line_end']}"
+                elif row["line_start"]:
+                    file_info += f":{row['line_start']}"
+                context_parts.append(f"📄 {file_info}")
+            if row["git_branch"]:
+                context_parts.append(f"🌿 {row['git_branch']}")
+
+            context_text = " | ".join(context_parts)
+            if context_text:
+                context_text = f"\n> {context_text}"
+
+            lines.append(f"### [{row['category']}] {time}{tags_text}{context_text}")
             lines.append(f"{row['content']}\n")
 
         return "\n".join(lines)

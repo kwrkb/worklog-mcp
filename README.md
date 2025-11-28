@@ -9,7 +9,8 @@ AIアシスタント向けの構造化された作業記録MCPサーバー。作
 ## 機能
 
 - **作業記録の追加**: カテゴリやタグ付きで作業内容を記録
-- **ログ検索**: キーワード、期間、カテゴリで柔軟に検索
+- **ファイルコンテキスト**: 編集ファイル、行番号、Gitブランチなどを自動記録
+- **ログ検索**: キーワード、期間、カテゴリ、ファイルパスで柔軟に検索
 - **SQLite保存**: ローカルにデータを永続化
 
 ## インストール
@@ -105,6 +106,26 @@ Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 }
 ```
 
+### VS Code (Roo Code / Cline)
+
+VS Code で MCP を使用するには、Roo Code や Cline などの拡張機能を使用します。
+拡張機能の設定画面（MCP Servers）で以下のように設定してください。
+
+```json
+{
+  "mcpServers": {
+    "worklog": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/kwrkb/worklog-mcp",
+        "worklog-mcp-server"
+      ]
+    }
+  }
+}
+```
+
 ### Gemini CLI
 
 Gemini CLI は `gemini mcp add` コマンドまたは設定ファイルの編集でMCPサーバーを追加できます。
@@ -159,6 +180,11 @@ MCPサーバーを設定後、Claude Code、Claude Desktop、Gemini CLI から�
 - `content` (必須): 作業内容
 - `category` (任意): カテゴリ名（例: 開発、レビュー、会議）
 - `tags` (任意): カンマ区切りのタグ
+- `file_path` (任意): 作業中のファイルパス
+- `line_start`, `line_end` (任意): 作業した行範囲
+- `git_branch` (任意): 現在のGitブランチ
+- `git_commit` (任意): 現在のGitコミットハッシュ
+- `project_path` (任意): プロジェクトのルートパス
 
 ### search_logs - ログを検索
 
@@ -174,6 +200,9 @@ MCPサーバーを設定後、Claude Code、Claude Desktop、Gemini CLI から�
 - `keyword` (任意): 検索キーワード
 - `start_date` (任意): 開始日（YYYY-MM-DD形式）
 - `end_date` (任意): 終了日（YYYY-MM-DD形式）
+- `file_path` (任意): ファイルパスで絞り込み（部分一致）
+- `project_path` (任意): プロジェクトパスで絞り込み（部分一致）
+- `git_branch` (任意): Gitブランチで絞り込み（完全一致）
 - `limit` (任意): 取得件数（デフォルト: 50）
 
 ### get_recent_logs - 最近のログを取得
@@ -407,7 +436,13 @@ CREATE TABLE logs (
     timestamp TEXT NOT NULL,
     category TEXT NOT NULL,
     content TEXT NOT NULL,
-    tags TEXT
+    tags TEXT,
+    file_path TEXT,
+    line_start INTEGER,
+    line_end INTEGER,
+    git_branch TEXT,
+    git_commit TEXT,
+    project_path TEXT
 );
 ```
 
@@ -510,7 +545,8 @@ A structured work log MCP server for AI assistants. Record and search your work 
 ## Features
 
 - **Add Work Logs**: Record work details with categories and tags.
-- **Search Logs**: Flexible search by keyword, date range, and category.
+- **File Context**: Automatically record edited files, line numbers, Git branches, and more.
+- **Search Logs**: Flexible search by keyword, date range, category, and file paths.
 - **SQLite Storage**: Persist data locally.
 
 ## Installation
@@ -606,6 +642,26 @@ Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 }
 ```
 
+### VS Code (Roo Code / Cline)
+
+To use MCP in VS Code, use extensions like Roo Code or Cline.
+Configure the extension settings (MCP Servers) as follows:
+
+```json
+{
+  "mcpServers": {
+    "worklog": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/kwrkb/worklog-mcp",
+        "worklog-mcp-server"
+      ]
+    }
+  }
+}
+```
+
 ### Gemini CLI
 
 Gemini CLI supports adding MCP servers via the `gemini mcp add` command or by editing the settings file.
@@ -660,6 +716,11 @@ Record the bug fix I did today
 - `content` (Required): Details of the work.
 - `category` (Optional): Category name (e.g., Development, Review, Meeting).
 - `tags` (Optional): Comma-separated tags.
+- `file_path` (Optional): Path to the file you're working on.
+- `line_start`, `line_end` (Optional): Range of lines being modified.
+- `git_branch` (Optional): Current Git branch.
+- `git_commit` (Optional): Current Git commit hash.
+- `project_path` (Optional): Project root directory.
 
 ### search_logs - Search logs
 
@@ -675,6 +736,9 @@ Show me bug fix history from last week
 - `keyword` (Optional): Search keyword.
 - `start_date` (Optional): Start date (YYYY-MM-DD format).
 - `end_date` (Optional): End date (YYYY-MM-DD format).
+- `file_path` (Optional): Filter by file path (partial match).
+- `project_path` (Optional): Filter by project path (partial match).
+- `git_branch` (Optional): Filter by Git branch (exact match).
 - `limit` (Optional): Number of results (default: 50).
 
 ### get_recent_logs - Get recent logs
@@ -908,7 +972,13 @@ CREATE TABLE logs (
     timestamp TEXT NOT NULL,
     category TEXT NOT NULL,
     content TEXT NOT NULL,
-    tags TEXT
+    tags TEXT,
+    file_path TEXT,
+    line_start INTEGER,
+    line_end INTEGER,
+    git_branch TEXT,
+    git_commit TEXT,
+    project_path TEXT
 );
 ```
 

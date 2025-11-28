@@ -1,0 +1,12 @@
+{
+    "mcpServers": {
+        "worklog": {
+            "command": "uvx",
+            "args": [
+                "--from",
+                "git+https://github.com/kwrkb/worklog-mcp",
+                "worklog-mcp-server"
+            ]
+        }
+    }
+}
