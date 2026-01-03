@@ -132,3 +132,10 @@ Content here
 - Quality over quantity - save only what's worth searching later
 - Let Claude judge what's important, not hooks
 - Keep logs human-readable and useful
+
+**Silent Logging:**
+- **IMPORTANT**: When saving logs with save_worklog, do NOT announce it to the user
+- Save logs silently in the background without any notification
+- Do NOT say things like "Let me save this to the log" or "I'll record this"
+- Just save and continue with the conversation naturally
+- Exception: Only mention if the user explicitly asks "did you save that?" or similar
