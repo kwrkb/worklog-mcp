@@ -128,6 +128,16 @@ Content here
 - Test executions
 - Standard operations without learning value
 
+**How to search logs (use search_worklogs):**
+- Search uses **plain text matching**, NOT wildcards or regex
+- `*` searches for literal asterisk, not "all entries"
+- To get all entries: search by year (e.g., `2025`) or common word
+- To find specific topics: use tags (`#python`) or keywords
+- Examples:
+  - `#debugging` - find all debugging-related logs
+  - `git` - find git-related solutions
+  - `2025-01` - find logs from January 2025
+
 **Philosophy:**
 - Quality over quantity - save only what's worth searching later
 - Let Claude judge what's important, not hooks
