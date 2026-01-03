@@ -4,17 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "worklog-mcp"
-version = "0.1.0"
-description = "AIのための構造化された作業記録MCPツール"
-requires-python = ">=3.11"
+version = "0.2.0"
+description = "Simple, plain-text worklog MCP server - searchable Markdown logs"
+requires-python = ">=3.10"
 dependencies = [
-    "typer",
-    "rich",
-    "pydantic",
-    "platformdirs",
     "mcp",
 ]
 
 [project.scripts]
-worklog-mcp = "worklog_mcp.main:app"
 worklog-mcp-server = "worklog_mcp.server:main"
