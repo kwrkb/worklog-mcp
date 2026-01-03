@@ -107,3 +107,28 @@ Tags: #tag1 #tag2
 
 Content here
 ```
+
+## Usage Guidelines for Claude
+
+**When to save logs (use save_worklog):**
+- After solving a tricky bug or error
+- When discovering useful debugging techniques
+- After completing significant implementation work
+- When finding solutions to unexpected problems
+- When user explicitly requests to save something
+
+**What to log:**
+- Focus on **insights and solutions**, not routine operations
+- Include context: what was the problem, what worked, what didn't
+- Use descriptive tags for searchability (e.g., #python, #debugging, #git)
+
+**What NOT to log:**
+- Routine file edits or writes
+- Simple bash commands
+- Test executions
+- Standard operations without learning value
+
+**Philosophy:**
+- Quality over quantity - save only what's worth searching later
+- Let Claude judge what's important, not hooks
+- Keep logs human-readable and useful

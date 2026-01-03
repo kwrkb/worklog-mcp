@@ -195,6 +195,48 @@ gemini mcp add -s user worklog uvx "--from" "git+https://github.com/kwrkb/worklo
 }
 ```
 
+## 使い方
+
+### Claude Code の場合（自動ログ保存）
+
+Claude Code では、Claude が自動的に重要な情報を判断して保存します：
+- バグ解決や実装完了などの重要な作業
+- 有用なデバッグ手法の発見
+- ユーザーが明示的に依頼したとき
+
+**あなたがすることは何もありません。** Claude が勝手に記録してくれます。
+
+### Gemini CLI や他の AI の場合（初回プロンプト）
+
+Gemini CLI や Claude Desktop など、CLAUDE.md を自動読み込みしない環境では、**最初に以下のプロンプトを伝えてください**：
+
+```
+worklog-mcp の使い方：
+
+【いつログを保存すべきか】
+- トリッキーなバグを解決したとき
+- 有用なデバッグ手法を発見したとき
+- 重要な実装作業を完了したとき
+- 予期しない問題の解決策を見つけたとき
+- 私が明示的に保存を依頼したとき
+
+【何をログすべきか】
+- 洞察と解決策に焦点を当てる（ルーチン作業は記録しない）
+- コンテキストを含める：問題は何か、何がうまくいったか、何がうまくいかなかったか
+- 検索性のために説明的なタグを使う（例：#python, #debugging, #git）
+
+【ログすべきでないもの】
+- ルーチンのファイル編集や書き込み
+- シンプルな bash コマンド
+- テスト実行
+- 学習価値のない標準的な操作
+
+【哲学】
+質より量 - 後で検索する価値があるものだけを保存してください。
+```
+
+この指示を伝えれば、どの AI も適切なタイミングでログを保存してくれます。
+
 ## MCPツールの使用例
 
 MCPサーバーを設定後、Claude Code、Claude Desktop、Gemini CLI から以下のツールが利用できます。
@@ -487,6 +529,48 @@ Add to `~/.gemini/settings.json` (global) or `.gemini/settings.json` (project):
   }
 }
 ```
+
+## Usage
+
+### For Claude Code (Automatic Logging)
+
+In Claude Code, Claude automatically judges and saves important information:
+- After solving tricky bugs or completing significant work
+- When discovering useful debugging techniques
+- When you explicitly request to save something
+
+**You don't need to do anything.** Claude will record automatically.
+
+### For Gemini CLI and Other AIs (Initial Prompt)
+
+For environments that don't automatically read CLAUDE.md (like Gemini CLI or Claude Desktop), **provide this prompt at the beginning**:
+
+```
+How to use worklog-mcp:
+
+[When to save logs]
+- After solving a tricky bug or error
+- When discovering useful debugging techniques
+- After completing significant implementation work
+- When finding solutions to unexpected problems
+- When I explicitly request to save something
+
+[What to log]
+- Focus on insights and solutions, not routine operations
+- Include context: what was the problem, what worked, what didn't
+- Use descriptive tags for searchability (e.g., #python, #debugging, #git)
+
+[What NOT to log]
+- Routine file edits or writes
+- Simple bash commands
+- Test executions
+- Standard operations without learning value
+
+[Philosophy]
+Quality over quantity - save only what's worth searching later.
+```
+
+After providing this instruction, any AI will save logs at appropriate times.
 
 ## MCP Tool Usage Examples
 
