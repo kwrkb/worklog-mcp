@@ -288,8 +288,21 @@ MCPサーバーを設定後、Claude Code、Claude Desktop、Gemini CLI から�
 | OS | パス |
 |----|------|
 | **Mac** | `~/Library/CloudStorage/GoogleDrive-*/My Drive/worklogs/` |
-| **Windows** | `~/Google Drive/worklogs/`, `G:/My Drive/worklogs/` |
+| **Windows** | `~/Google Drive/worklogs/`, `D:〜Z:/My Drive/worklogs/` |
 | **WSL** | `/mnt/c/Users/<user>/Google Drive/worklogs/` |
+
+> **WSLでGoogle Driveがドライブレター（G:など）にマウントされている場合:**
+> WSLではデフォルトでCドライブのみがマウントされるため、`WORKLOG_DIR`で直接指定してください：
+> ```json
+> {
+>   "mcpServers": {
+>     "worklog": {
+>       "command": "worklog-mcp-server",
+>       "env": { "WORKLOG_DIR": "/mnt/g/My Drive/worklogs" }
+>     }
+>   }
+> }
+> ```
 
 ### カスタム保存先の設定
 
@@ -643,8 +656,21 @@ Log data is stored as Markdown files:
 | OS | Path |
 |----|------|
 | **Mac** | `~/Library/CloudStorage/GoogleDrive-*/My Drive/worklogs/` |
-| **Windows** | `~/Google Drive/worklogs/`, `G:/My Drive/worklogs/` |
+| **Windows** | `~/Google Drive/worklogs/`, `D:-Z:/My Drive/worklogs/` |
 | **WSL** | `/mnt/c/Users/<user>/Google Drive/worklogs/` |
+
+> **When Google Drive is mounted as a drive letter (e.g., G:) in WSL:**
+> WSL only mounts the C: drive by default. Use `WORKLOG_DIR` to specify the path directly:
+> ```json
+> {
+>   "mcpServers": {
+>     "worklog": {
+>       "command": "worklog-mcp-server",
+>       "env": { "WORKLOG_DIR": "/mnt/g/My Drive/worklogs" }
+>     }
+>   }
+> }
+> ```
 
 ### Configure Custom Storage Location
 

@@ -32,28 +32,37 @@ def _detect_macos_google_drive() -> Path | None:
 
 def _detect_windows_google_drive() -> Path | None:
     """WindowsでGoogle Driveを検出"""
-    # 一般的なパスを順番にチェック
-    candidates = [
-        Path.home() / "Google Drive",
-        Path("G:/My Drive"),
-        Path("G:/"),
-    ]
-    for path in candidates:
-        if path.exists():
-            return path
+    # 1. ホームディレクトリ配下を最優先
+    home_gdrive = Path.home() / "Google Drive"
+    if home_gdrive.exists():
+        return home_gdrive
+
+    # 2. 全ドライブレター（D:〜Z:）をスキャン
+    # 英語: "My Drive", 日本語: "マイドライブ"
+    drive_names = ["My Drive", "マイドライブ"]
+    for letter in "DEFGHIJKLMNOPQRSTUVWXYZ":
+        for drive_name in drive_names:
+            path = Path(f"{letter}:/{drive_name}")
+            if path.exists():
+                return path
+
     return None
 
 
 def _detect_linux_google_drive() -> Path | None:
     """Linux/WSLでGoogle Driveを検出"""
     # WSL: /mnt/c/Users/<user>/Google Drive
+    # 英語: "Google Drive", 日本語: "Google ドライブ"
+    gdrive_names = ["Google Drive", "Google ドライブ"]
+
     mnt_c = Path("/mnt/c/Users")
     if mnt_c.exists():
         for user_dir in mnt_c.iterdir():
             if user_dir.is_dir():
-                gdrive = user_dir / "Google Drive"
-                if gdrive.exists():
-                    return gdrive
+                for gdrive_name in gdrive_names:
+                    gdrive = user_dir / gdrive_name
+                    if gdrive.exists():
+                        return gdrive
     return None
 
 

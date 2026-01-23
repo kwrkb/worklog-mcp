@@ -60,8 +60,10 @@ worklog-mcp-server
 | OS | Path |
 |----|------|
 | **Mac** | `~/Library/CloudStorage/GoogleDrive-*/My Drive/worklogs/` |
-| **Windows** | `~/Google Drive/worklogs/`, `G:/My Drive/worklogs/` |
+| **Windows** | `~/Google Drive/worklogs/`, `D:-Z:/My Drive/worklogs/` |
 | **WSL** | `/mnt/c/Users/<user>/Google Drive/worklogs/` |
+
+> **WSL + Google Drive (ドライブレター):** WSLではCドライブのみ自動マウント。G:ドライブ等を使う場合は `WORKLOG_DIR` で指定: `"env": { "WORKLOG_DIR": "/mnt/g/My Drive/worklogs" }`
 
 ## MCP Tools
 
