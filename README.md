@@ -265,23 +265,43 @@ MCPサーバーを設定後、Claude Code、Claude Desktop、Gemini CLI から�
 
 ログデータはMarkdownファイルとして保存されます：
 
-```
-~/.worklogs/2026-01.md
-~/.worklogs/2025-12.md
-~/.worklogs/2025-11.md
-...
-```
+| 場所 | パス | 備考 |
+|------|------|------|
+| **ローカル** | `~/.worklogs/YYYY-MM.md` | 隠しディレクトリ |
+| **Google Drive** | `worklogs/YYYY-MM.md` | ドットなし（クラウド向け） |
+
+### ストレージ設定
+
+| 環境変数 | 値 | 説明 |
+|----------|-----|------|
+| `WORKLOG_DIR` | パス | 最優先。直接パス指定 |
+| `WORKLOG_STORAGE` | `local` / `googledrive` / `auto` | ストレージ選択（デフォルト: `auto`） |
+
+#### ストレージモード
+
+- **`auto`**（デフォルト）: Google Driveを自動検出、なければローカル
+- **`local`**: 常に `~/.worklogs/` を使用
+- **`googledrive`**: Google Driveを使用（見つからなければローカルにフォールバック）
+
+#### Google Driveパス（自動検出）
+
+| OS | パス |
+|----|------|
+| **Mac** | `~/Library/CloudStorage/GoogleDrive-*/My Drive/worklogs/` |
+| **Windows** | `~/Google Drive/worklogs/`, `G:/My Drive/worklogs/` |
+| **WSL** | `/mnt/c/Users/<user>/Google Drive/worklogs/` |
 
 ### カスタム保存先の設定
-
-環境変数 `WORKLOG_DIR` で保存先をカスタマイズできます：
 
 ```bash
 # カスタムディレクトリを指定
 export WORKLOG_DIR=~/Documents/worklogs
 
-# WSLからWindowsのディレクトリを使用
-export WORKLOG_DIR=/mnt/c/Users/username/worklogs
+# Google Drive使用を強制
+export WORKLOG_STORAGE=googledrive
+
+# ローカル保存のみ（Google Drive無視）
+export WORKLOG_STORAGE=local
 ```
 
 **永続化するには `.bashrc` や `.zshrc` に追加してください。**
@@ -600,23 +620,43 @@ After configuring the MCP server, the following tools are available from Claude 
 
 Log data is stored as Markdown files:
 
-```
-~/.worklogs/2026-01.md
-~/.worklogs/2025-12.md
-~/.worklogs/2025-11.md
-...
-```
+| Location | Path | Note |
+|----------|------|------|
+| **Local** | `~/.worklogs/YYYY-MM.md` | Hidden directory |
+| **Google Drive** | `worklogs/YYYY-MM.md` | No dot prefix (cloud-friendly) |
+
+### Storage Configuration
+
+| Variable | Values | Description |
+|----------|--------|-------------|
+| `WORKLOG_DIR` | Path | Highest priority. Direct path specification |
+| `WORKLOG_STORAGE` | `local` / `googledrive` / `auto` | Storage selection (default: `auto`) |
+
+#### Storage Modes
+
+- **`auto`** (default): Auto-detect Google Drive, fallback to local
+- **`local`**: Always use `~/.worklogs/`
+- **`googledrive`**: Use Google Drive (fallback to local if not found)
+
+#### Google Drive Paths (Auto-detected)
+
+| OS | Path |
+|----|------|
+| **Mac** | `~/Library/CloudStorage/GoogleDrive-*/My Drive/worklogs/` |
+| **Windows** | `~/Google Drive/worklogs/`, `G:/My Drive/worklogs/` |
+| **WSL** | `/mnt/c/Users/<user>/Google Drive/worklogs/` |
 
 ### Configure Custom Storage Location
-
-You can customize the storage location using the `WORKLOG_DIR` environment variable:
 
 ```bash
 # Specify custom directory
 export WORKLOG_DIR=~/Documents/worklogs
 
-# Use Windows directory from WSL
-export WORKLOG_DIR=/mnt/c/Users/username/worklogs
+# Force Google Drive usage
+export WORKLOG_STORAGE=googledrive
+
+# Local only (ignore Google Drive)
+export WORKLOG_STORAGE=local
 ```
 
 **To persist, add to `.bashrc` or `.zshrc`.**

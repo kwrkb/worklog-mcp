@@ -11,12 +11,97 @@ from mcp.server.fastmcp import FastMCP
 # MCPサーバー初期化
 mcp = FastMCP("worklog-mcp")
 
+
+# Google Drive検出（OS別）
+def _detect_macos_google_drive() -> Path | None:
+    """MacでGoogle Driveを検出"""
+    cloud_storage = Path.home() / "Library" / "CloudStorage"
+    if not cloud_storage.exists():
+        return None
+
+    # GoogleDrive-*（アカウント名付き）を検索
+    for item in cloud_storage.iterdir():
+        if item.is_dir() and item.name.startswith("GoogleDrive-"):
+            # 英語: "My Drive", 日本語: "マイドライブ"
+            for drive_name in ["My Drive", "マイドライブ"]:
+                my_drive = item / drive_name
+                if my_drive.exists():
+                    return my_drive
+    return None
+
+
+def _detect_windows_google_drive() -> Path | None:
+    """WindowsでGoogle Driveを検出"""
+    # 一般的なパスを順番にチェック
+    candidates = [
+        Path.home() / "Google Drive",
+        Path("G:/My Drive"),
+        Path("G:/"),
+    ]
+    for path in candidates:
+        if path.exists():
+            return path
+    return None
+
+
+def _detect_linux_google_drive() -> Path | None:
+    """Linux/WSLでGoogle Driveを検出"""
+    # WSL: /mnt/c/Users/<user>/Google Drive
+    mnt_c = Path("/mnt/c/Users")
+    if mnt_c.exists():
+        for user_dir in mnt_c.iterdir():
+            if user_dir.is_dir():
+                gdrive = user_dir / "Google Drive"
+                if gdrive.exists():
+                    return gdrive
+    return None
+
+
+def detect_google_drive_path() -> Path | None:
+    """OS別にGoogle Driveを自動検出"""
+    import sys
+
+    if sys.platform == "darwin":
+        return _detect_macos_google_drive()
+    elif sys.platform == "win32":
+        return _detect_windows_google_drive()
+    else:  # linux, WSL
+        return _detect_linux_google_drive()
+
 # ログディレクトリの取得（環境変数またはデフォルト）
 def get_worklog_dir() -> Path:
-    """ログディレクトリを取得（環境変数 WORKLOG_DIR または ~/.worklogs）"""
+    """ログディレクトリを取得
+
+    優先順位:
+    1. WORKLOG_DIR 環境変数（直接パス指定）
+    2. WORKLOG_STORAGE 環境変数に基づく選択
+       - "local": ~/.worklogs/
+       - "googledrive": Google Drive/worklogs/（見つからなければローカル）
+       - "auto"（デフォルト）: Google Drive検出、なければローカル
+    """
+    # 1. WORKLOG_DIR が設定されていれば最優先
     custom_dir = os.environ.get("WORKLOG_DIR")
     if custom_dir:
         return Path(custom_dir).expanduser()
+
+    # 2. WORKLOG_STORAGE に基づく選択
+    storage = os.environ.get("WORKLOG_STORAGE", "auto").lower()
+
+    if storage == "local":
+        return Path.home() / ".worklogs"
+
+    # googledrive または auto: Google Driveを検出
+    gdrive = detect_google_drive_path()
+
+    if storage == "googledrive":
+        if gdrive:
+            return gdrive / "worklogs"
+        # Google Drive未インストール時はローカルにフォールバック
+        return Path.home() / ".worklogs"
+
+    # auto: Google Driveがあればそちら、なければローカル
+    if gdrive:
+        return gdrive / "worklogs"
     return Path.home() / ".worklogs"
 
 
