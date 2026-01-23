@@ -44,26 +44,21 @@ worklog-mcp-server
 
 ### Environment Variables
 
-| Variable | Values | Description |
-|----------|--------|-------------|
-| `WORKLOG_DIR` | Path | Highest priority. Direct path specification |
-| `WORKLOG_STORAGE` | `local` / `googledrive` / `auto` | Storage selection (default: `auto`) |
+| Variable | Description |
+|----------|-------------|
+| `WORKLOG_DIR` | Custom path for worklog storage (default: `~/.worklogs/`) |
 
-#### Storage Modes
+### Cloud Sync (Google Drive, Dropbox, etc.)
 
-- **`auto`** (default): Auto-detect Google Drive, fallback to local
-- **`local`**: Always use `~/.worklogs/`
-- **`googledrive`**: Use Google Drive (fallback to local if not found)
+Use symlinks to sync worklogs across devices:
 
-#### Google Drive Paths (Auto-detected)
+```bash
+# Mac/Linux
+ln -s ~/Google\ Drive/worklogs ~/.worklogs
 
-| OS | Path |
-|----|------|
-| **Mac** | `~/Library/CloudStorage/GoogleDrive-*/My Drive/worklogs/` |
-| **Windows** | `~/Google Drive/worklogs/`, `D:-Z:/My Drive/worklogs/` |
-| **WSL** | `/mnt/c/Users/<user>/Google Drive/worklogs/` |
-
-> **WSL + Google Drive (ドライブレター):** WSLではCドライブのみ自動マウント。G:ドライブ等を使う場合は `WORKLOG_DIR` で指定: `"env": { "WORKLOG_DIR": "/mnt/g/My Drive/worklogs" }`
+# Windows (PowerShell as Admin)
+mklink /D "C:\Users\<user>\.worklogs" "G:\My Drive\worklogs"
+```
 
 ## MCP Tools
 
@@ -112,12 +107,7 @@ worklog-mcp-server
 
 ## Data Storage
 
-Logs are stored in monthly Markdown files:
-
-| Location | Path | Note |
-|----------|------|------|
-| **Local** | `~/.worklogs/YYYY-MM.md` | Hidden directory |
-| **Google Drive** | `worklogs/YYYY-MM.md` | No dot prefix (cloud-friendly) |
+Logs are stored in monthly Markdown files at `~/.worklogs/YYYY-MM.md`.
 
 Each entry has format:
 ```markdown
