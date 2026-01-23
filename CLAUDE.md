@@ -44,7 +44,24 @@ worklog-mcp-server
 
 ### Environment Variables
 
-- `WORKLOG_DIR`: Custom log directory (default: `~/.worklogs`)
+| Variable | Values | Description |
+|----------|--------|-------------|
+| `WORKLOG_DIR` | Path | Highest priority. Direct path specification |
+| `WORKLOG_STORAGE` | `local` / `googledrive` / `auto` | Storage selection (default: `auto`) |
+
+#### Storage Modes
+
+- **`auto`** (default): Auto-detect Google Drive, fallback to local
+- **`local`**: Always use `~/.worklogs/`
+- **`googledrive`**: Use Google Drive (fallback to local if not found)
+
+#### Google Drive Paths (Auto-detected)
+
+| OS | Path |
+|----|------|
+| **Mac** | `~/Library/CloudStorage/GoogleDrive-*/My Drive/worklogs/` |
+| **Windows** | `~/Google Drive/worklogs/`, `G:/My Drive/worklogs/` |
+| **WSL** | `/mnt/c/Users/<user>/Google Drive/worklogs/` |
 
 ## MCP Tools
 
@@ -93,12 +110,12 @@ worklog-mcp-server
 
 ## Data Storage
 
-All logs stored in:
-```
-~/.worklogs/2026-01.md
-~/.worklogs/2025-12.md
-~/.worklogs/2025-11.md
-```
+Logs are stored in monthly Markdown files:
+
+| Location | Path | Note |
+|----------|------|------|
+| **Local** | `~/.worklogs/YYYY-MM.md` | Hidden directory |
+| **Google Drive** | `worklogs/YYYY-MM.md` | No dot prefix (cloud-friendly) |
 
 Each entry has format:
 ```markdown
